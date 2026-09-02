@@ -1,0 +1,109 @@
+body {
+    background-color: #f5f7fa;
+    font-family: Arial, sans-serif;
+}
+
+
+/* Navbar */
+
+.navbar-brand {
+    font-size: 22px;
+}
+
+
+/* Hero */
+
+.hero {
+    padding: 80px 20px;
+    background: linear-gradient(135deg, #e8f0ff, #ffffff);
+}
+
+.hero h1 {
+    font-size: 45px;
+    font-weight: bold;
+}
+
+.hero p {
+    font-size: 18px;
+    color: #555;
+    max-width: 650px;
+    margin: 15px auto 25px;
+}
+
+
+/* Gig Cards */
+
+.gig-card {
+    border: none;
+    border-radius: 15px;
+    padding: 10px;
+    transition: 0.2s;
+}
+
+.gig-card:hover {
+    transform: translateY(-4px);
+}
+
+.gig-card .reward {
+    font-size: 20px;
+    font-weight: bold;
+}
+
+
+/* Forms */
+
+.form-container {
+    background: white;
+    max-width: 700px;
+    margin: auto;
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+}
+
+
+/* Status */
+
+.status {
+    font-weight: bold;
+}
+
+.status-available {
+    color: green;
+}
+
+.status-accepted {
+    color: orange;
+}
+
+.status-completed {
+    color: blue;
+}
+
+
+/* Rating */
+
+.stars {
+    font-size: 45px;
+    cursor: pointer;
+    letter-spacing: 8px;
+}
+
+.stars span:hover {
+    transform: scale(1.1);
+}
+
+
+/* Mobile */
+
+@media (max-width: 768px) {
+
+    .hero h1 {
+        font-size: 32px;
+    }
+
+    .navbar-nav {
+        margin-top: 10px;
+    }
+
+}
