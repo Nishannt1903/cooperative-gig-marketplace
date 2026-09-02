@@ -42,15 +42,12 @@ app.get("/", (req, res) => {
 // USERS
 // ==================================================
 
-// Get all users
 app.get("/api/users", (req, res) => {
     res.json(users);
 });
 
-// Get one user
 app.get("/api/users/:id", (req, res) => {
     const id = parseInt(req.params.id);
-
     const user = users.find(user => user.id === id);
 
     if (!user) {
@@ -63,18 +60,81 @@ app.get("/api/users/:id", (req, res) => {
 });
 
 // ==================================================
+// REGISTER
+// ==================================================
+
+app.post("/api/register", (req, res) => {
+    const { name, email } = req.body;
+
+    if (!name || !email) {
+        return res.status(400).json({
+            message: "Name and email are required"
+        });
+    }
+
+    const existingUser = users.find(
+        user => user.email.toLowerCase() === email.toLowerCase()
+    );
+
+    if (existingUser) {
+        return res.status(400).json({
+            message: "Email already registered"
+        });
+    }
+
+    const newUser = {
+        id: users.length + 1,
+        name,
+        email
+    };
+
+    users.push(newUser);
+
+    res.status(201).json({
+        message: "Registration successful",
+        user: newUser
+    });
+});
+
+// ==================================================
+// LOGIN
+// ==================================================
+
+app.post("/api/login", (req, res) => {
+    const { email } = req.body;
+
+    if (!email) {
+        return res.status(400).json({
+            message: "Email is required"
+        });
+    }
+
+    const user = users.find(
+        user => user.email.toLowerCase() === email.toLowerCase()
+    );
+
+    if (!user) {
+        return res.status(404).json({
+            message: "User not found. Please register first."
+        });
+    }
+
+    res.json({
+        message: "Login successful",
+        user
+    });
+});
+
+// ==================================================
 // GIGS
 // ==================================================
 
-// GET ALL GIGS
 app.get("/api/gigs", (req, res) => {
     res.json(gigs);
 });
 
-// GET ONE GIG
 app.get("/api/gigs/:id", (req, res) => {
     const id = parseInt(req.params.id);
-
     const gig = gigs.find(gig => gig.id === id);
 
     if (!gig) {
@@ -109,13 +169,13 @@ app.post("/api/gigs", (req, res) => {
 
     const newGig = {
         id: gigs.length + 1,
-        title: title,
-        description: description,
-        category: category,
-        location: location,
+        title,
+        description,
+        category,
+        location,
         reward: Number(reward),
         deadline: deadline || null,
-        posted_by: posted_by || 1,
+        posted_by: Number(posted_by) || 1,
         accepted_by: null,
         status: "AVAILABLE",
         created_at: new Date()
@@ -145,12 +205,6 @@ app.post("/api/gigs/:id/accept", (req, res) => {
         });
     }
 
-    if (!user_id) {
-        return res.status(400).json({
-            message: "User ID is required"
-        });
-    }
-
     const user = users.find(user => user.id === Number(user_id));
 
     if (!user) {
@@ -176,7 +230,7 @@ app.post("/api/gigs/:id/accept", (req, res) => {
 
     res.json({
         message: "Gig accepted successfully",
-        gig: gig
+        gig
     });
 });
 
@@ -186,7 +240,6 @@ app.post("/api/gigs/:id/accept", (req, res) => {
 
 app.post("/api/gigs/:id/complete", (req, res) => {
     const id = parseInt(req.params.id);
-
     const gig = gigs.find(gig => gig.id === id);
 
     if (!gig) {
@@ -205,7 +258,7 @@ app.post("/api/gigs/:id/complete", (req, res) => {
 
     res.json({
         message: "Gig completed successfully",
-        gig: gig
+        gig
     });
 });
 
@@ -237,13 +290,13 @@ app.post("/api/gigs/:id/rating", (req, res) => {
         });
     }
 
-    if (!from_user || !to_user || !rating) {
+    const numericRating = Number(rating);
+
+    if (!from_user || !to_user || !numericRating) {
         return res.status(400).json({
-            message: "from_user, to_user and rating are required"
+            message: "Required rating information is missing"
         });
     }
-
-    const numericRating = Number(rating);
 
     if (numericRating < 1 || numericRating > 5) {
         return res.status(400).json({
@@ -283,4 +336,4 @@ app.get("/api/ratings", (req, res) => {
 
 app.listen(PORT, "0.0.0.0", () => {
     console.log(`Server running on http://localhost:${PORT}`);
-}); //
+});
