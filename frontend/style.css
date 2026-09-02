@@ -1,109 +1,95 @@
+/* =====================================================
+   GENERAL
+===================================================== */
+
 body {
-    background-color: #f5f7fa;
+    background: #f8f9fa;
     font-family: Arial, sans-serif;
 }
 
 
-/* Navbar */
-
-.navbar-brand {
-    font-size: 22px;
-}
-
-
-/* Hero */
+/* =====================================================
+   HERO
+===================================================== */
 
 .hero {
     padding: 80px 20px;
-    background: linear-gradient(135deg, #e8f0ff, #ffffff);
+    background: #e9f2ff;
 }
 
+
 .hero h1 {
-    font-size: 45px;
+    font-size: 48px;
     font-weight: bold;
 }
+
 
 .hero p {
     font-size: 18px;
-    color: #555;
-    max-width: 650px;
-    margin: 15px auto 25px;
+    margin-top: 15px;
 }
 
 
-/* Gig Cards */
-
-.gig-card {
-    border: none;
-    border-radius: 15px;
-    padding: 10px;
-    transition: 0.2s;
-}
-
-.gig-card:hover {
-    transform: translateY(-4px);
-}
-
-.gig-card .reward {
-    font-size: 20px;
-    font-weight: bold;
-}
-
-
-/* Forms */
+/* =====================================================
+   FORM
+===================================================== */
 
 .form-container {
-    background: white;
-    max-width: 700px;
+    max-width: 600px;
     margin: auto;
     padding: 30px;
-    border-radius: 15px;
+    background: white;
+    border-radius: 12px;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
 }
 
 
-/* Status */
+/* =====================================================
+   GIG CARD
+===================================================== */
 
-.status {
-    font-weight: bold;
-}
-
-.status-available {
-    color: green;
-}
-
-.status-accepted {
-    color: orange;
-}
-
-.status-completed {
-    color: blue;
+.gig-card {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    transition: 0.2s;
 }
 
 
-/* Rating */
+.gig-card:hover {
+    transform: translateY(-3px);
+}
+
+
+/* =====================================================
+   STARS
+===================================================== */
 
 .stars {
     font-size: 45px;
+    margin-top: 20px;
+}
+
+
+.stars span {
     cursor: pointer;
-    letter-spacing: 8px;
-}
-
-.stars span:hover {
-    transform: scale(1.1);
+    margin: 4px;
 }
 
 
-/* Mobile */
+/* =====================================================
+   MOBILE
+===================================================== */
 
 @media (max-width: 768px) {
 
     .hero h1 {
-        font-size: 32px;
+        font-size: 36px;
     }
 
+
     .navbar-nav {
-        margin-top: 10px;
+        padding: 10px;
     }
 
 }
