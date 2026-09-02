@@ -8,114 +8,60 @@ app.use(express.json());
 
 const PORT = 5000;
 
-// ==================================================
-// TEMPORARY DATABASE
-// ==================================================
+// ===============================
+// USERS
+// ===============================
 
-let users = [
+const users = [
     {
         id: 1,
         name: "Rahul",
-        email: "rahul@example.com"
+        email: "rahul@example.com",
+        role: "provider"
     },
     {
         id: 2,
         name: "Amit",
-        email: "amit@example.com"
+        email: "amit@example.com",
+        role: "accepter"
     }
 ];
 
 let gigs = [];
 let ratings = [];
 
-// ==================================================
+// ===============================
 // HOME
-// ==================================================
+// ===============================
 
 app.get("/", (req, res) => {
     res.json({
-        message: "Cooperative Gig Marketplace API is running!"
+        message: "GigConnect API is running!"
     });
 });
 
-// ==================================================
-// USERS
-// ==================================================
-
-app.get("/api/users", (req, res) => {
-    res.json(users);
-});
-
-app.get("/api/users/:id", (req, res) => {
-    const id = parseInt(req.params.id);
-    const user = users.find(user => user.id === id);
-
-    if (!user) {
-        return res.status(404).json({
-            message: "User not found"
-        });
-    }
-
-    res.json(user);
-});
-
-// ==================================================
-// REGISTER
-// ==================================================
-
-app.post("/api/register", (req, res) => {
-    const { name, email } = req.body;
-
-    if (!name || !email) {
-        return res.status(400).json({
-            message: "Name and email are required"
-        });
-    }
-
-    const existingUser = users.find(
-        user => user.email.toLowerCase() === email.toLowerCase()
-    );
-
-    if (existingUser) {
-        return res.status(400).json({
-            message: "Email already registered"
-        });
-    }
-
-    const newUser = {
-        id: users.length + 1,
-        name,
-        email
-    };
-
-    users.push(newUser);
-
-    res.status(201).json({
-        message: "Registration successful",
-        user: newUser
-    });
-});
-
-// ==================================================
+// ===============================
 // LOGIN
-// ==================================================
+// ===============================
 
 app.post("/api/login", (req, res) => {
-    const { email } = req.body;
+    const { email, role } = req.body;
 
-    if (!email) {
+    if (!email || !role) {
         return res.status(400).json({
-            message: "Email is required"
+            message: "Email and role are required"
         });
     }
 
     const user = users.find(
-        user => user.email.toLowerCase() === email.toLowerCase()
+        u =>
+            u.email.toLowerCase() === email.toLowerCase() &&
+            u.role === role
     );
 
     if (!user) {
-        return res.status(404).json({
-            message: "User not found. Please register first."
+        return res.status(401).json({
+            message: "Invalid email or role"
         });
     }
 
@@ -125,17 +71,30 @@ app.post("/api/login", (req, res) => {
     });
 });
 
-// ==================================================
-// GIGS
-// ==================================================
+// ===============================
+// GET USERS
+// ===============================
+
+app.get("/api/users", (req, res) => {
+    res.json(users);
+});
+
+// ===============================
+// GET ALL GIGS
+// ===============================
 
 app.get("/api/gigs", (req, res) => {
     res.json(gigs);
 });
 
+// ===============================
+// GET SINGLE GIG
+// ===============================
+
 app.get("/api/gigs/:id", (req, res) => {
-    const id = parseInt(req.params.id);
-    const gig = gigs.find(gig => gig.id === id);
+    const id = Number(req.params.id);
+
+    const gig = gigs.find(g => g.id === id);
 
     if (!gig) {
         return res.status(404).json({
@@ -146,11 +105,12 @@ app.get("/api/gigs/:id", (req, res) => {
     res.json(gig);
 });
 
-// ==================================================
-// CREATE GIG
-// ==================================================
+// ===============================
+// PROVIDER POSTS GIG
+// ===============================
 
 app.post("/api/gigs", (req, res) => {
+
     const {
         title,
         description,
@@ -161,9 +121,32 @@ app.post("/api/gigs", (req, res) => {
         posted_by
     } = req.body;
 
-    if (!title || !description || !category || !location || !reward) {
+    if (
+        !title ||
+        !description ||
+        !category ||
+        !location ||
+        !reward ||
+        !posted_by
+    ) {
         return res.status(400).json({
-            message: "Please provide title, description, category, location and reward"
+            message: "All gig details are required"
+        });
+    }
+
+    const provider = users.find(
+        u => u.id === Number(posted_by)
+    );
+
+    if (!provider) {
+        return res.status(404).json({
+            message: "Provider not found"
+        });
+    }
+
+    if (provider.role !== "provider") {
+        return res.status(403).json({
+            message: "Only providers can post gigs"
         });
     }
 
@@ -175,9 +158,15 @@ app.post("/api/gigs", (req, res) => {
         location,
         reward: Number(reward),
         deadline: deadline || null,
-        posted_by: Number(posted_by) || 1,
+
+        posted_by: provider.id,
+        provider_name: provider.name,
+
         accepted_by: null,
+        accepter_name: null,
+
         status: "AVAILABLE",
+
         created_at: new Date()
     };
 
@@ -189,15 +178,16 @@ app.post("/api/gigs", (req, res) => {
     });
 });
 
-// ==================================================
-// ACCEPT GIG
-// ==================================================
+// ===============================
+// ACCEPTER ACCEPTS GIG
+// ===============================
 
 app.post("/api/gigs/:id/accept", (req, res) => {
-    const id = parseInt(req.params.id);
+
+    const id = Number(req.params.id);
     const { user_id } = req.body;
 
-    const gig = gigs.find(gig => gig.id === id);
+    const gig = gigs.find(g => g.id === id);
 
     if (!gig) {
         return res.status(404).json({
@@ -205,42 +195,53 @@ app.post("/api/gigs/:id/accept", (req, res) => {
         });
     }
 
-    const user = users.find(user => user.id === Number(user_id));
+    const accepter = users.find(
+        u => u.id === Number(user_id)
+    );
 
-    if (!user) {
+    if (!accepter) {
         return res.status(404).json({
             message: "User not found"
         });
     }
 
-    if (gig.status !== "AVAILABLE") {
-        return res.status(400).json({
-            message: "This gig is not available"
+    if (accepter.role !== "accepter") {
+        return res.status(403).json({
+            message: "Only accepters can accept gigs"
         });
     }
 
-    if (gig.posted_by === Number(user_id)) {
+    if (gig.status !== "AVAILABLE") {
+        return res.status(400).json({
+            message: "This gig is no longer available"
+        });
+    }
+
+    if (gig.posted_by === accepter.id) {
         return res.status(400).json({
             message: "You cannot accept your own gig"
         });
     }
 
-    gig.accepted_by = Number(user_id);
+    gig.accepted_by = accepter.id;
+    gig.accepter_name = accepter.name;
     gig.status = "ACCEPTED";
 
     res.json({
-        message: "Gig accepted successfully",
+        message: "Gig accepted successfully!",
         gig
     });
 });
 
-// ==================================================
+// ===============================
 // COMPLETE GIG
-// ==================================================
+// ===============================
 
 app.post("/api/gigs/:id/complete", (req, res) => {
-    const id = parseInt(req.params.id);
-    const gig = gigs.find(gig => gig.id === id);
+
+    const id = Number(req.params.id);
+
+    const gig = gigs.find(g => g.id === id);
 
     if (!gig) {
         return res.status(404).json({
@@ -250,24 +251,25 @@ app.post("/api/gigs/:id/complete", (req, res) => {
 
     if (gig.status !== "ACCEPTED") {
         return res.status(400).json({
-            message: "Gig must be accepted before completion"
+            message: "Gig must be accepted first"
         });
     }
 
     gig.status = "COMPLETED";
 
     res.json({
-        message: "Gig completed successfully",
+        message: "Gig completed successfully!",
         gig
     });
 });
 
-// ==================================================
-// RATE GIG
-// ==================================================
+// ===============================
+// ADD RATING
+// ===============================
 
 app.post("/api/gigs/:id/rating", (req, res) => {
-    const id = parseInt(req.params.id);
+
+    const id = Number(req.params.id);
 
     const {
         from_user,
@@ -276,7 +278,7 @@ app.post("/api/gigs/:id/rating", (req, res) => {
         comment
     } = req.body;
 
-    const gig = gigs.find(gig => gig.id === id);
+    const gig = gigs.find(g => g.id === id);
 
     if (!gig) {
         return res.status(404).json({
@@ -292,13 +294,20 @@ app.post("/api/gigs/:id/rating", (req, res) => {
 
     const numericRating = Number(rating);
 
-    if (!from_user || !to_user || !numericRating) {
+    if (
+        !from_user ||
+        !to_user ||
+        !numericRating
+    ) {
         return res.status(400).json({
-            message: "Required rating information is missing"
+            message: "Rating information is missing"
         });
     }
 
-    if (numericRating < 1 || numericRating > 5) {
+    if (
+        numericRating < 1 ||
+        numericRating > 5
+    ) {
         return res.status(400).json({
             message: "Rating must be between 1 and 5"
         });
@@ -317,23 +326,25 @@ app.post("/api/gigs/:id/rating", (req, res) => {
     ratings.push(newRating);
 
     res.status(201).json({
-        message: "Rating submitted successfully",
+        message: "Rating submitted successfully!",
         rating: newRating
     });
 });
 
-// ==================================================
+// ===============================
 // GET RATINGS
-// ==================================================
+// ===============================
 
 app.get("/api/ratings", (req, res) => {
     res.json(ratings);
 });
 
-// ==================================================
-// SERVER
-// ==================================================
+// ===============================
+// START SERVER
+// ===============================
 
 app.listen(PORT, "0.0.0.0", () => {
-    console.log(`Server running on http://localhost:${PORT}`);
+    console.log(
+        `Server running on http://localhost:${PORT}`
+    );
 });

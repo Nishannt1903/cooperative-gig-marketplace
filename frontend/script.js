@@ -1,34 +1,37 @@
-// ==================================================
-// API
-// ==================================================
+// =====================================================
+// CONFIGURATION
+// =====================================================
 
 const API_URL = "http://192.168.6.127:5000/api";
 
 
-// ==================================================
+// =====================================================
 // GLOBAL VARIABLES
-// ==================================================
+// =====================================================
 
-let currentUser = JSON.parse(localStorage.getItem("currentUser"));
+let currentUser =
+    JSON.parse(localStorage.getItem("currentUser")) || null;
 
 let selectedRating = 0;
 let selectedGigForRating = null;
 
 
-// ==================================================
-// PAGE CONTROL
-// ==================================================
+// =====================================================
+// PAGE NAVIGATION
+// =====================================================
 
 function showPage(pageId) {
 
-    if (!currentUser && pageId !== "login" && pageId !== "register") {
+    if (!currentUser) {
         showLogin();
         return;
     }
 
-    document.querySelectorAll(".page").forEach(page => {
-        page.classList.add("d-none");
-    });
+    document
+        .querySelectorAll(".page")
+        .forEach(page => {
+            page.classList.add("d-none");
+        });
 
     const page = document.getElementById(pageId);
 
@@ -46,212 +49,181 @@ function showPage(pageId) {
 }
 
 
-// ==================================================
-// LOGIN / REGISTER PAGE
-// ==================================================
+// =====================================================
+// LOGIN PAGE
+// =====================================================
 
 function showLogin() {
 
-    document.querySelectorAll(".page").forEach(page => {
-        page.classList.add("d-none");
-    });
+    document
+        .querySelectorAll(".page")
+        .forEach(page => {
+            page.classList.add("d-none");
+        });
 
-    document.getElementById("login").classList.remove("d-none");
+    document
+        .getElementById("login")
+        .classList.remove("d-none");
 }
 
 
-function showRegister() {
-
-    document.querySelectorAll(".page").forEach(page => {
-        page.classList.add("d-none");
-    });
-
-    document.getElementById("register").classList.remove("d-none");
-}
-
-
-// ==================================================
-// LOGIN
-// ==================================================
-
-const loginForm = document.getElementById("loginForm");
-
-if (loginForm) {
-
-    loginForm.addEventListener("submit", async function(event) {
-
-        event.preventDefault();
-
-        const email = document.getElementById("loginEmail").value.trim();
-
-        if (!email) {
-            return;
-        }
-
-        try {
-
-            const response = await fetch(`${API_URL}/login`, {
-
-                method: "POST",
-
-                headers: {
-                    "Content-Type": "application/json"
-                },
-
-                body: JSON.stringify({
-                    email: email
-                })
-
-            });
-
-            const data = await response.json();
-
-            if (!response.ok) {
-
-                document.getElementById("loginMessage").innerHTML =
-                    `<div class="alert alert-danger">${data.message}</div>`;
-
-                return;
-            }
-
-            currentUser = data.user;
-
-            localStorage.setItem(
-                "currentUser",
-                JSON.stringify(currentUser)
-            );
-
-            updateUserDisplay();
-
-            document.getElementById("loginForm").reset();
-
-            showPage("home");
-
-        } catch (error) {
-
-            console.error("Login error:", error);
-
-            document.getElementById("loginMessage").innerHTML =
-                `<div class="alert alert-danger">
-                    Cannot connect to server.
-                </div>`;
-        }
-
-    });
-
-}
-
-
-// ==================================================
-// REGISTER
-// ==================================================
-
-const registerForm = document.getElementById("registerForm");
-
-if (registerForm) {
-
-    registerForm.addEventListener("submit", async function(event) {
-
-        event.preventDefault();
-
-        const name =
-            document.getElementById("registerName").value.trim();
-
-        const email =
-            document.getElementById("registerEmail").value.trim();
-
-        try {
-
-            const response = await fetch(`${API_URL}/register`, {
-
-                method: "POST",
-
-                headers: {
-                    "Content-Type": "application/json"
-                },
-
-                body: JSON.stringify({
-                    name: name,
-                    email: email
-                })
-
-            });
-
-            const data = await response.json();
-
-            if (!response.ok) {
-
-                document.getElementById("registerMessage").innerHTML =
-                    `<div class="alert alert-danger">${data.message}</div>`;
-
-                return;
-            }
-
-            currentUser = data.user;
-
-            localStorage.setItem(
-                "currentUser",
-                JSON.stringify(currentUser)
-            );
-
-            updateUserDisplay();
-
-            document.getElementById("registerForm").reset();
-
-            alert("Registration successful! 🎉");
-
-            showPage("home");
-
-        } catch (error) {
-
-            console.error("Registration error:", error);
-
-            document.getElementById("registerMessage").innerHTML =
-                `<div class="alert alert-danger">
-                    Cannot connect to server.
-                </div>`;
-        }
-
-    });
-
-}
-
-
-// ==================================================
-// USER DISPLAY
-// ==================================================
+// =====================================================
+// UPDATE USER DISPLAY
+// =====================================================
 
 function updateUserDisplay() {
 
-    const userDisplay =
+    const nameDisplay =
         document.getElementById("userNameDisplay");
 
     const logoutButton =
         document.getElementById("logoutButton");
 
-    if (!userDisplay || !logoutButton) {
+    const postGigButton =
+        document.getElementById("postGigNavButton");
+
+    const homePostButton =
+        document.getElementById("homePostButton");
+
+
+    if (!currentUser) {
+
+        nameDisplay.textContent = "";
+
+        logoutButton.style.display = "none";
+
+        postGigButton.style.display = "none";
+
+        homePostButton.style.display = "none";
+
         return;
     }
 
-    if (currentUser) {
 
-        userDisplay.textContent =
-            `👤 ${currentUser.name}`;
+    nameDisplay.textContent =
+        `${currentUser.name} (${currentUser.role})`;
 
-        logoutButton.style.display = "block";
+    logoutButton.style.display = "block";
+
+
+    // Only provider can post
+    if (currentUser.role === "provider") {
+
+        postGigButton.style.display = "block";
+
+        homePostButton.style.display = "inline-block";
 
     } else {
 
-        userDisplay.textContent = "";
+        postGigButton.style.display = "none";
 
-        logoutButton.style.display = "none";
+        homePostButton.style.display = "none";
     }
 }
 
 
-// ==================================================
+// =====================================================
+// LOGIN
+// =====================================================
+
+document
+    .getElementById("loginForm")
+    .addEventListener("submit", async function (event) {
+
+        event.preventDefault();
+
+        const email =
+            document
+                .getElementById("loginEmail")
+                .value
+                .trim();
+
+        const role =
+            document
+                .getElementById("loginRole")
+                .value;
+
+        const message =
+            document.getElementById("loginMessage");
+
+
+        try {
+
+            const response =
+                await fetch(`${API_URL}/login`, {
+
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+
+                    body: JSON.stringify({
+                        email,
+                        role
+                    })
+                });
+
+
+            const data =
+                await response.json();
+
+
+            if (!response.ok) {
+
+                message.innerHTML = `
+                    <div class="alert alert-danger">
+                        ${data.message}
+                    </div>
+                `;
+
+                return;
+            }
+
+
+            currentUser = data.user;
+
+            localStorage.setItem(
+                "currentUser",
+                JSON.stringify(currentUser)
+            );
+
+
+            message.innerHTML = `
+                <div class="alert alert-success">
+                    Login successful!
+                </div>
+            `;
+
+
+            updateUserDisplay();
+
+
+            setTimeout(() => {
+
+                showPage("home");
+
+            }, 500);
+
+
+        } catch (error) {
+
+            console.error(error);
+
+            message.innerHTML = `
+                <div class="alert alert-danger">
+                    Cannot connect to backend.
+                    Please check the server.
+                </div>
+            `;
+        }
+
+    });
+
+
+// =====================================================
 // LOGOUT
-// ==================================================
+// =====================================================
 
 function logout() {
 
@@ -259,43 +231,44 @@ function logout() {
 
     currentUser = null;
 
+    selectedRating = 0;
+
+    selectedGigForRating = null;
+
     updateUserDisplay();
 
     showLogin();
 }
 
 
-// ==================================================
+// =====================================================
 // LOAD GIGS
-// ==================================================
+// =====================================================
 
 async function loadGigs() {
+
+    const container =
+        document.getElementById("gigContainer");
+
 
     try {
 
         const response =
             await fetch(`${API_URL}/gigs`);
 
-        const gigs = await response.json();
+        const gigs =
+            await response.json();
 
-        const container =
-            document.getElementById("gigContainer");
-
-        if (!container) {
-            return;
-        }
 
         container.innerHTML = "";
 
-        const availableGigs =
-            gigs.filter(gig => gig.status === "AVAILABLE");
 
-        if (availableGigs.length === 0) {
+        if (gigs.length === 0) {
 
             container.innerHTML = `
                 <div class="col-12">
                     <div class="alert alert-info">
-                        No gigs available yet. Be the first to post one!
+                        No gigs available yet.
                     </div>
                 </div>
             `;
@@ -303,43 +276,72 @@ async function loadGigs() {
             return;
         }
 
-        availableGigs.forEach(gig => {
 
-            container.innerHTML += createGigCard(gig);
+        gigs.forEach(gig => {
+
+            container.innerHTML +=
+                createGigCard(gig);
 
         });
 
+
     } catch (error) {
 
-        console.error("Load gigs error:", error);
+        console.error(error);
 
-        const container =
-            document.getElementById("gigContainer");
-
-        if (container) {
-
-            container.innerHTML = `
-                <div class="col-12">
-                    <div class="alert alert-danger">
-                        Unable to load gigs. Check the backend server.
-                    </div>
+        container.innerHTML = `
+            <div class="col-12">
+                <div class="alert alert-danger">
+                    Cannot load gigs.
                 </div>
-            `;
-        }
+            </div>
+        `;
     }
 }
 
 
-// ==================================================
-// GIG CARD
-// ==================================================
+// =====================================================
+// CREATE GIG CARD
+// =====================================================
 
 function createGigCard(gig) {
 
+    let button = "";
+
+
+    if (
+        currentUser &&
+        currentUser.role === "accepter" &&
+        gig.status === "AVAILABLE"
+    ) {
+
+        button = `
+            <button
+                class="btn btn-success"
+                onclick="acceptGig(${gig.id})"
+            >
+                Accept Gig
+            </button>
+        `;
+
+    } else {
+
+        button = `
+            <button
+                class="btn btn-outline-primary"
+                onclick="viewGig(${gig.id})"
+            >
+                View Details
+            </button>
+        `;
+    }
+
+
     return `
+
         <div class="col-md-6 col-lg-4">
 
-            <div class="card gig-card shadow-sm h-100">
+            <div class="card gig-card h-100">
 
                 <div class="card-body">
 
@@ -347,7 +349,7 @@ function createGigCard(gig) {
                         ${gig.title}
                     </h5>
 
-                    <p class="text-muted">
+                    <p class="card-text">
                         ${gig.description}
                     </p>
 
@@ -357,49 +359,26 @@ function createGigCard(gig) {
                     </p>
 
                     <p>
-                        📍 ${gig.location}
+                        <strong>Location:</strong>
+                        ${gig.location}
                     </p>
 
                     <p>
-                        📅 Deadline:
-                        ${gig.deadline || "Not specified"}
-                    </p>
-
-                    <p class="reward">
+                        <strong>Reward:</strong>
                         ₹${gig.reward}
                     </p>
 
-                    <span class="badge bg-success">
+                    <p>
+                        <strong>Provider:</strong>
+                        ${gig.provider_name}
+                    </p>
+
+                    <p>
+                        <strong>Status:</strong>
                         ${gig.status}
-                    </span>
+                    </p>
 
-                    <div class="mt-3">
-
-                        <button
-                            class="btn btn-outline-primary btn-sm"
-                            onclick="viewGig(${gig.id})">
-                            View Details
-                        </button>
-
-                        ${
-                            gig.posted_by !== currentUser.id
-                            ?
-                            `
-                            <button
-                                class="btn btn-primary btn-sm ms-2"
-                                onclick="acceptGig(${gig.id})">
-                                Accept Gig
-                            </button>
-                            `
-                            :
-                            `
-                            <span class="text-muted ms-2">
-                                Your Gig
-                            </span>
-                            `
-                        }
-
-                    </div>
+                    ${button}
 
                 </div>
 
@@ -410,9 +389,9 @@ function createGigCard(gig) {
 }
 
 
-// ==================================================
+// =====================================================
 // VIEW GIG
-// ==================================================
+// =====================================================
 
 async function viewGig(id) {
 
@@ -421,190 +400,228 @@ async function viewGig(id) {
         const response =
             await fetch(`${API_URL}/gigs/${id}`);
 
-        const gig = await response.json();
+        const gig =
+            await response.json();
 
-        if (!response.ok) {
 
-            alert(gig.message);
-            return;
-        }
+        document
+            .querySelectorAll(".page")
+            .forEach(page => {
+                page.classList.add("d-none");
+            });
 
-        const container =
-            document.getElementById("detailsContainer");
 
-        container.innerHTML = `
+        document
+            .getElementById("gigDetails")
+            .classList.remove("d-none");
 
-            <div class="form-container">
 
-                <h2>${gig.title}</h2>
+        document
+            .getElementById("detailsContainer")
+            .innerHTML = `
 
-                <p>${gig.description}</p>
+                <div class="card">
 
-                <hr>
+                    <div class="card-body">
 
-                <p>
-                    <strong>Category:</strong>
-                    ${gig.category}
-                </p>
+                        <h2>
+                            ${gig.title}
+                        </h2>
 
-                <p>
-                    <strong>Location:</strong>
-                    ${gig.location}
-                </p>
+                        <p>
+                            ${gig.description}
+                        </p>
 
-                <p>
-                    <strong>Reward:</strong>
-                    ₹${gig.reward}
-                </p>
+                        <hr>
 
-                <p>
-                    <strong>Deadline:</strong>
-                    ${gig.deadline || "Not specified"}
-                </p>
+                        <p>
+                            <strong>Category:</strong>
+                            ${gig.category}
+                        </p>
 
-                <p>
-                    <strong>Status:</strong>
-                    ${gig.status}
-                </p>
+                        <p>
+                            <strong>Location:</strong>
+                            ${gig.location}
+                        </p>
 
-                ${
-                    gig.status === "AVAILABLE" &&
-                    gig.posted_by !== currentUser.id
-                    ?
-                    `
-                    <button
-                        class="btn btn-primary"
-                        onclick="acceptGig(${gig.id})">
-                        Accept Gig
-                    </button>
-                    `
-                    :
-                    ""
-                }
+                        <p>
+                            <strong>Reward:</strong>
+                            ₹${gig.reward}
+                        </p>
 
-                <button
-                    class="btn btn-secondary ms-2"
-                    onclick="showPage('home')">
-                    Back
-                </button>
+                        <p>
+                            <strong>Deadline:</strong>
+                            ${gig.deadline || "Not specified"}
+                        </p>
 
-            </div>
-        `;
+                        <p>
+                            <strong>Provider:</strong>
+                            ${gig.provider_name}
+                        </p>
 
-        showPage("gigDetails");
+                        <p>
+                            <strong>Status:</strong>
+                            ${gig.status}
+                        </p>
+
+                        <button
+                            class="btn btn-secondary"
+                            onclick="showPage('home')"
+                        >
+                            Back
+                        </button>
+
+                    </div>
+
+                </div>
+            `;
+
 
     } catch (error) {
 
-        console.error("View gig error:", error);
+        console.error(error);
 
         alert("Unable to load gig details.");
     }
 }
 
 
-// ==================================================
+// =====================================================
 // ACCEPT GIG
-// ==================================================
+// =====================================================
 
 async function acceptGig(id) {
 
     if (!currentUser) {
 
-        showLogin();
+        alert("Please login first.");
+
         return;
     }
 
+
+    if (currentUser.role !== "accepter") {
+
+        alert("Only a Gig Accepter can accept gigs.");
+
+        return;
+    }
+
+
     console.log("Accepting gig:", id);
-    console.log("Current user:", currentUser);
+
+    console.log("Accepter:", currentUser);
+
 
     try {
 
         const response =
-            await fetch(`${API_URL}/gigs/${id}/accept`, {
+            await fetch(
+                `${API_URL}/gigs/${id}/accept`,
+                {
+                    method: "POST",
 
-                method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
 
-                headers: {
-                    "Content-Type": "application/json"
-                },
+                    body: JSON.stringify({
+                        user_id: Number(currentUser.id)
+                    })
+                }
+            );
 
-                body: JSON.stringify({
-                    user_id: Number(currentUser.id)
-                })
 
-            });
+        const data =
+            await response.json();
 
-        const data = await response.json();
 
         console.log("Accept response:", data);
 
+
         if (!response.ok) {
 
-            alert("❌ " + data.message);
+            alert(data.message);
 
             return;
         }
 
+
         alert("Gig accepted successfully! 🎉");
+
+
+        await loadGigs();
 
         await loadMyGigs();
 
         showPage("myGigs");
+
 
     } catch (error) {
 
         console.error("Accept error:", error);
 
         alert(
-            "Unable to accept gig.\n\n" +
-            "Please check that Laptop 1 backend is running."
+            "Cannot connect to backend. " +
+            "Please make sure the server is running."
         );
     }
 }
 
 
-// ==================================================
+// =====================================================
 // POST GIG
-// ==================================================
+// =====================================================
 
-const gigForm = document.getElementById("gigForm");
-
-if (gigForm) {
-
-    gigForm.addEventListener("submit", async function(event) {
+document
+    .getElementById("gigForm")
+    .addEventListener("submit", async function (event) {
 
         event.preventDefault();
 
+
         if (!currentUser) {
 
-            showLogin();
+            alert("Please login first.");
+
             return;
         }
+
+
+        if (currentUser.role !== "provider") {
+
+            alert("Only a Gig Provider can post gigs.");
+
+            return;
+        }
+
 
         const gigData = {
 
             title:
-                document.getElementById("title").value.trim(),
+                document.getElementById("title").value,
 
             description:
-                document.getElementById("description").value.trim(),
+                document.getElementById("description").value,
 
             category:
                 document.getElementById("category").value,
 
             location:
-                document.getElementById("location").value.trim(),
+                document.getElementById("location").value,
 
             reward:
-                Number(document.getElementById("reward").value),
+                Number(
+                    document.getElementById("reward").value
+                ),
 
             deadline:
                 document.getElementById("deadline").value,
 
             posted_by:
                 Number(currentUser.id)
-
         };
+
 
         try {
 
@@ -618,123 +635,125 @@ if (gigForm) {
                     },
 
                     body: JSON.stringify(gigData)
-
                 });
 
-            const data = await response.json();
+
+            const data =
+                await response.json();
+
 
             if (!response.ok) {
 
                 alert(data.message);
+
                 return;
             }
 
+
             alert("Gig posted successfully! 🎉");
 
-            gigForm.reset();
+
+            document
+                .getElementById("gigForm")
+                .reset();
+
+
+            await loadGigs();
 
             showPage("home");
 
+
         } catch (error) {
 
-            console.error("Post gig error:", error);
+            console.error(error);
 
-            alert("Unable to post gig.");
+            alert(
+                "Cannot connect to backend."
+            );
         }
 
     });
 
-}
 
-
-// ==================================================
+// =====================================================
 // MY GIGS
-// ==================================================
+// =====================================================
 
 async function loadMyGigs() {
 
-    if (!currentUser) {
-        showLogin();
-        return;
-    }
+    const container =
+        document.getElementById("myGigsContainer");
+
 
     try {
 
         const response =
             await fetch(`${API_URL}/gigs`);
 
-        const gigs = await response.json();
+        const gigs =
+            await response.json();
 
-        if (!response.ok) {
-
-            alert("Unable to load gigs.");
-            return;
-        }
-
-        const container =
-            document.getElementById("myGigsContainer");
-
-        container.innerHTML = "";
 
         const myGigs =
             gigs.filter(gig =>
-                Number(gig.posted_by) === Number(currentUser.id) ||
-                Number(gig.accepted_by) === Number(currentUser.id)
+
+                Number(gig.posted_by) ===
+                    Number(currentUser.id)
+
+                ||
+
+                Number(gig.accepted_by) ===
+                    Number(currentUser.id)
+
             );
+
+
+        container.innerHTML = "";
+
 
         if (myGigs.length === 0) {
 
             container.innerHTML = `
                 <div class="col-12">
-
                     <div class="alert alert-info">
                         You don't have any gigs yet.
                     </div>
-
                 </div>
             `;
 
             return;
         }
 
+
         myGigs.forEach(gig => {
 
-            let actionButton = "";
+            let action = "";
 
-            // Accepted by current user
+
+            // Accepter can complete
             if (
-                gig.status === "ACCEPTED" &&
-                Number(gig.accepted_by) === Number(currentUser.id)
+                currentUser.role === "accepter" &&
+                Number(gig.accepted_by) ===
+                    Number(currentUser.id) &&
+                gig.status === "ACCEPTED"
             ) {
 
-                actionButton = `
+                action = `
                     <button
-                        class="btn btn-success btn-sm"
-                        onclick="completeGig(${gig.id})">
+                        class="btn btn-success"
+                        onclick="completeGig(${gig.id})"
+                    >
                         Mark Completed
                     </button>
                 `;
             }
 
-            // Completed gig
-            if (
-                gig.status === "COMPLETED"
-            ) {
-
-                actionButton = `
-                    <button
-                        class="btn btn-primary btn-sm"
-                        onclick="openRating(${gig.id})">
-                        ⭐ Rate
-                    </button>
-                `;
-            }
 
             container.innerHTML += `
 
-                <div class="col-md-6 col-lg-4">
+                <div class="col-md-6">
 
-                    <div class="card gig-card shadow-sm h-100">
+                    <div class="card gig-card">
 
                         <div class="card-body">
 
@@ -747,23 +766,32 @@ async function loadMyGigs() {
                             </p>
 
                             <p>
-                                📍 ${gig.location}
-                            </p>
-
-                            <p class="reward">
+                                <strong>Reward:</strong>
                                 ₹${gig.reward}
                             </p>
 
                             <p>
-                                Status:
-                                <strong>
-                                    ${gig.status}
-                                </strong>
+                                <strong>Status:</strong>
+                                ${gig.status}
                             </p>
 
-                            <div>
-                                ${actionButton}
-                            </div>
+                            <p>
+                                <strong>Provider:</strong>
+                                ${gig.provider_name}
+                            </p>
+
+                            ${
+                                gig.accepter_name
+                                ? `
+                                <p>
+                                    <strong>Accepter:</strong>
+                                    ${gig.accepter_name}
+                                </p>
+                                `
+                                : ""
+                            }
+
+                            ${action}
 
                         </div>
 
@@ -771,134 +799,141 @@ async function loadMyGigs() {
 
                 </div>
             `;
-
         });
+
 
     } catch (error) {
 
-        console.error("My gigs error:", error);
+        console.error(error);
 
-        alert("Unable to load your gigs.");
+        container.innerHTML = `
+            <div class="col-12">
+                <div class="alert alert-danger">
+                    Cannot load your gigs.
+                </div>
+            </div>
+        `;
     }
 }
 
 
-// ==================================================
+// =====================================================
 // COMPLETE GIG
-// ==================================================
+// =====================================================
 
 async function completeGig(id) {
-
-    if (!currentUser) {
-
-        showLogin();
-        return;
-    }
 
     try {
 
         const response =
-            await fetch(`${API_URL}/gigs/${id}/complete`, {
+            await fetch(
+                `${API_URL}/gigs/${id}/complete`,
+                {
+                    method: "POST",
 
-                method: "POST",
-
-                headers: {
-                    "Content-Type": "application/json"
+                    headers: {
+                        "Content-Type": "application/json"
+                    }
                 }
+            );
 
-            });
 
-        const data = await response.json();
+        const data =
+            await response.json();
 
-        console.log("Complete response:", data);
 
         if (!response.ok) {
 
-            alert("❌ " + data.message);
+            alert(data.message);
+
             return;
         }
 
-        alert("Gig marked as completed! 🎉");
 
-        // IMPORTANT:
-        // Keep the complete gig object for rating
+        alert(
+            "Gig completed successfully! 🎉"
+        );
+
+
         selectedGigForRating = data.gig;
 
-        selectedRating = 0;
+        openRating(data.gig.id);
 
-        const commentBox =
-            document.getElementById("ratingComment");
-
-        if (commentBox) {
-            commentBox.value = "";
-        }
-
-        resetStars();
-
-        showPage("rating");
 
     } catch (error) {
 
-        console.error("Complete error:", error);
+        console.error(error);
 
-        alert("Unable to complete gig.");
+        alert(
+            "Cannot connect to backend."
+        );
     }
 }
 
 
-// ==================================================
+// =====================================================
 // OPEN RATING
-// ==================================================
+// =====================================================
 
 async function openRating(id) {
 
     try {
 
-        // Get complete gig information
         const response =
             await fetch(`${API_URL}/gigs/${id}`);
 
-        const gig = await response.json();
+        const gig =
+            await response.json();
 
-        if (!response.ok) {
-
-            alert(gig.message);
-            return;
-        }
 
         selectedGigForRating = gig;
 
         selectedRating = 0;
 
-        document.getElementById("ratingComment").value = "";
-
         resetStars();
 
-        showPage("rating");
+        document
+            .getElementById("ratingComment")
+            .value = "";
+
+
+        document
+            .querySelectorAll(".page")
+            .forEach(page => {
+                page.classList.add("d-none");
+            });
+
+
+        document
+            .getElementById("rating")
+            .classList.remove("d-none");
+
 
     } catch (error) {
 
-        console.error("Open rating error:", error);
+        console.error(error);
 
         alert("Unable to open rating.");
     }
 }
 
 
-// ==================================================
+// =====================================================
 // SELECT RATING
-// ==================================================
+// =====================================================
 
-function selectRating(value) {
+function selectRating(number) {
 
-    selectedRating = value;
+    selectedRating = number;
+
 
     const stars =
         document.querySelectorAll(".stars span");
 
+
     stars.forEach((star, index) => {
 
-        if (index < value) {
+        if (index < number) {
 
             star.textContent = "★";
 
@@ -911,67 +946,80 @@ function selectRating(value) {
 }
 
 
-// ==================================================
+// =====================================================
 // RESET STARS
-// ==================================================
+// =====================================================
 
 function resetStars() {
 
-    const stars =
-        document.querySelectorAll(".stars span");
+    document
+        .querySelectorAll(".stars span")
+        .forEach(star => {
 
-    stars.forEach(star => {
+            star.textContent = "☆";
 
-        star.textContent = "☆";
-    });
+        });
 }
 
 
-// ==================================================
+// =====================================================
 // SUBMIT RATING
-// ==================================================
+// =====================================================
 
 async function submitRating() {
 
     if (!currentUser) {
 
-        showLogin();
+        alert("Please login first.");
+
         return;
     }
+
 
     if (!selectedGigForRating) {
 
-        alert("No gig selected for rating.");
+        alert("No gig selected.");
+
         return;
     }
+
 
     if (selectedRating === 0) {
 
-        alert("Please select a rating ⭐");
+        alert("Please select a rating.");
+
         return;
     }
 
-    const gig = selectedGigForRating;
 
-    // Determine who should receive the rating
+    const gig =
+        selectedGigForRating;
+
+
+    // Find the other person
     let toUser;
 
-    if (Number(gig.posted_by) === Number(currentUser.id)) {
 
-        // Poster rates the person who accepted the gig
-        toUser = Number(gig.accepted_by);
+    if (
+        Number(gig.posted_by) ===
+        Number(currentUser.id)
+    ) {
+
+        toUser =
+            Number(gig.accepted_by);
 
     } else {
 
-        // Person who accepted rates the poster
-        toUser = Number(gig.posted_by);
+        toUser =
+            Number(gig.posted_by);
     }
 
-    if (!toUser) {
 
-        alert("Unable to determine the user to rate.");
-        return;
-    }
+    const comment =
+        document
+            .getElementById("ratingComment")
+            .value;
+
 
     try {
 
@@ -979,7 +1027,6 @@ async function submitRating() {
             await fetch(
                 `${API_URL}/gigs/${gig.id}/rating`,
                 {
-
                     method: "POST",
 
                     headers: {
@@ -995,54 +1042,59 @@ async function submitRating() {
                             toUser,
 
                         rating:
-                            Number(selectedRating),
+                            selectedRating,
 
                         comment:
-                            document.getElementById(
-                                "ratingComment"
-                            ).value.trim()
-
+                            comment
                     })
-
                 }
             );
 
-        const data = await response.json();
 
-        console.log("Rating response:", data);
+        const data =
+            await response.json();
+
 
         if (!response.ok) {
 
-            alert("❌ " + data.message);
+            alert(data.message);
+
             return;
         }
 
-        alert("Rating submitted successfully! ⭐");
 
-        selectedGigForRating = null;
+        alert(
+            "Rating submitted successfully! ⭐"
+        );
+
 
         selectedRating = 0;
 
-        document.getElementById("ratingComment").value = "";
+        selectedGigForRating = null;
 
         resetStars();
 
-        showPage("home");
+
+        showPage("myGigs");
+
 
     } catch (error) {
 
-        console.error("Rating error:", error);
+        console.error(error);
 
-        alert("Unable to submit rating.");
+        alert(
+            "Cannot connect to backend."
+        );
     }
 }
 
 
-// ==================================================
+// =====================================================
 // START APPLICATION
-// ==================================================
+// =====================================================
 
 updateUserDisplay();
+
 
 if (currentUser) {
 

@@ -1,28 +1,37 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>GigConnect - Cooperative Gig Marketplace</title>
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
-    <!-- Bootstrap -->
+    <title>
+        GigConnect - Cooperative Gig Marketplace
+    </title>
+
     <link
         href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
         rel="stylesheet"
     >
 
-    <!-- Custom CSS -->
-    <link rel="stylesheet" href="style.css">
+    <link
+        rel="stylesheet"
+        href="style.css"
+    >
+
 </head>
 
 <body>
 
-<!-- =====================================================
-     NAVBAR
-===================================================== -->
+<!-- ================= NAVBAR ================= -->
 
 <nav class="navbar navbar-expand-lg bg-dark navbar-dark">
+
     <div class="container">
 
         <a
@@ -33,7 +42,10 @@
             🤝 GigConnect
         </a>
 
-        <div class="navbar-nav ms-auto align-items-center">
+        <div
+            class="navbar-nav ms-auto align-items-center"
+            id="mainNavigation"
+        >
 
             <a
                 class="nav-link"
@@ -52,36 +64,34 @@
             </a>
 
             <button
+                id="postGigNavButton"
                 class="btn btn-primary ms-2"
                 onclick="showPage('postGig')"
             >
                 + Post Gig
             </button>
 
-            <!-- Logged-in user name -->
             <span
                 id="userNameDisplay"
                 class="text-white ms-3"
             ></span>
 
-            <!-- Logout -->
             <button
                 id="logoutButton"
                 class="btn btn-outline-light btn-sm ms-2"
                 onclick="logout()"
-                style="display: none;"
             >
                 Logout
             </button>
 
         </div>
+
     </div>
+
 </nav>
 
 
-<!-- =====================================================
-     LOGIN
-===================================================== -->
+<!-- ================= LOGIN ================= -->
 
 <section id="login" class="page">
 
@@ -90,21 +100,48 @@
         <div class="form-container">
 
             <h2 class="text-center">
-                🤝 Welcome to GigConnect
+                🤝 GigConnect Login
             </h2>
 
             <p class="text-center text-muted">
-                Login to find help or help others.
+                Choose your role to continue.
             </p>
+
 
             <form id="loginForm">
 
+                <!-- ROLE -->
+
                 <div class="mb-3">
 
-                    <label
-                        for="loginEmail"
-                        class="form-label"
+                    <label class="form-label">
+                        Login As
+                    </label>
+
+                    <select
+                        id="loginRole"
+                        class="form-select"
+                        required
                     >
+
+                        <option value="provider">
+                            Gig Provider
+                        </option>
+
+                        <option value="accepter">
+                            Gig Accepter
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <!-- EMAIL -->
+
+                <div class="mb-3">
+
+                    <label class="form-label">
                         Email
                     </label>
 
@@ -118,6 +155,7 @@
 
                 </div>
 
+
                 <button
                     type="submit"
                     class="btn btn-primary w-100"
@@ -127,115 +165,28 @@
 
             </form>
 
-            <p class="text-center mt-3">
-
-                Don't have an account?
-
-                <a
-                    href="#"
-                    onclick="showRegister()"
-                >
-                    Register
-                </a>
-
-            </p>
 
             <div
                 id="loginMessage"
                 class="mt-3"
             ></div>
 
-        </div>
 
-    </div>
+            <div class="alert alert-info mt-4">
 
-</section>
+                <strong>Demo Accounts</strong>
 
+                <br><br>
 
-<!-- =====================================================
-     REGISTER
-===================================================== -->
+                <b>Provider:</b>
+                rahul@example.com
 
-<section id="register" class="page d-none">
+                <br>
 
-    <div class="container mt-5">
+                <b>Accepter:</b>
+                amit@example.com
 
-        <div class="form-container">
-
-            <h2 class="text-center">
-                Create Account
-            </h2>
-
-            <p class="text-center text-muted">
-                Join your local cooperative community.
-            </p>
-
-            <form id="registerForm">
-
-                <div class="mb-3">
-
-                    <label
-                        for="registerName"
-                        class="form-label"
-                    >
-                        Name
-                    </label>
-
-                    <input
-                        type="text"
-                        id="registerName"
-                        class="form-control"
-                        placeholder="Your name"
-                        required
-                    >
-
-                </div>
-
-                <div class="mb-3">
-
-                    <label
-                        for="registerEmail"
-                        class="form-label"
-                    >
-                        Email
-                    </label>
-
-                    <input
-                        type="email"
-                        id="registerEmail"
-                        class="form-control"
-                        placeholder="you@example.com"
-                        required
-                    >
-
-                </div>
-
-                <button
-                    type="submit"
-                    class="btn btn-primary w-100"
-                >
-                    Register
-                </button>
-
-            </form>
-
-            <p class="text-center mt-3">
-
-                Already have an account?
-
-                <a
-                    href="#"
-                    onclick="showLogin()"
-                >
-                    Login
-                </a>
-
-            </p>
-
-            <div
-                id="registerMessage"
-                class="mt-3"
-            ></div>
+            </div>
 
         </div>
 
@@ -244,13 +195,13 @@
 </section>
 
 
-<!-- =====================================================
-     HOME
-===================================================== -->
+<!-- ================= HOME ================= -->
 
-<section id="home" class="page d-none">
+<section
+    id="home"
+    class="page d-none"
+>
 
-    <!-- Hero -->
     <div class="hero text-center">
 
         <div class="container">
@@ -260,11 +211,12 @@
             </h1>
 
             <p>
-                Connect with people in your community for
-                small household and local tasks.
+                Connect with people in your community
+                for small household and local tasks.
             </p>
 
             <button
+                id="homePostButton"
                 class="btn btn-primary"
                 onclick="showPage('postGig')"
             >
@@ -275,8 +227,6 @@
 
     </div>
 
-
-    <!-- Available Gigs -->
 
     <div class="container mt-5">
 
@@ -294,11 +244,12 @@
 </section>
 
 
-<!-- =====================================================
-     POST GIG
-===================================================== -->
+<!-- ================= POST GIG ================= -->
 
-<section id="postGig" class="page d-none">
+<section
+    id="postGig"
+    class="page d-none"
+>
 
     <div class="container mt-5">
 
@@ -312,16 +263,12 @@
                 Tell your community what help you need.
             </p>
 
-            <form id="gigForm">
 
-                <!-- Title -->
+            <form id="gigForm">
 
                 <div class="mb-3">
 
-                    <label
-                        for="title"
-                        class="form-label"
-                    >
+                    <label class="form-label">
                         Task Title
                     </label>
 
@@ -336,14 +283,9 @@
                 </div>
 
 
-                <!-- Description -->
-
                 <div class="mb-3">
 
-                    <label
-                        for="description"
-                        class="form-label"
-                    >
+                    <label class="form-label">
                         Description
                     </label>
 
@@ -358,14 +300,9 @@
                 </div>
 
 
-                <!-- Category -->
-
                 <div class="mb-3">
 
-                    <label
-                        for="category"
-                        class="form-label"
-                    >
+                    <label class="form-label">
                         Category
                     </label>
 
@@ -396,14 +333,9 @@
                 </div>
 
 
-                <!-- Location -->
-
                 <div class="mb-3">
 
-                    <label
-                        for="location"
-                        class="form-label"
-                    >
+                    <label class="form-label">
                         Location
                     </label>
 
@@ -418,14 +350,9 @@
                 </div>
 
 
-                <!-- Reward -->
-
                 <div class="mb-3">
 
-                    <label
-                        for="reward"
-                        class="form-label"
-                    >
+                    <label class="form-label">
                         Reward (₹)
                     </label>
 
@@ -441,14 +368,9 @@
                 </div>
 
 
-                <!-- Deadline -->
-
                 <div class="mb-3">
 
-                    <label
-                        for="deadline"
-                        class="form-label"
-                    >
+                    <label class="form-label">
                         Deadline
                     </label>
 
@@ -462,14 +384,13 @@
                 </div>
 
 
-                <!-- Buttons -->
-
                 <button
                     type="submit"
                     class="btn btn-primary"
                 >
                     Post Gig
                 </button>
+
 
                 <button
                     type="button"
@@ -488,11 +409,12 @@
 </section>
 
 
-<!-- =====================================================
-     GIG DETAILS
-===================================================== -->
+<!-- ================= GIG DETAILS ================= -->
 
-<section id="gigDetails" class="page d-none">
+<section
+    id="gigDetails"
+    class="page d-none"
+>
 
     <div class="container mt-5">
 
@@ -503,11 +425,12 @@
 </section>
 
 
-<!-- =====================================================
-     MY GIGS
-===================================================== -->
+<!-- ================= MY GIGS ================= -->
 
-<section id="myGigs" class="page d-none">
+<section
+    id="myGigs"
+    class="page d-none"
+>
 
     <div class="container mt-5">
 
@@ -529,11 +452,12 @@
 </section>
 
 
-<!-- =====================================================
-     RATING
-===================================================== -->
+<!-- ================= RATING ================= -->
 
-<section id="rating" class="page d-none">
+<section
+    id="rating"
+    class="page d-none"
+>
 
     <div class="container mt-5">
 
@@ -547,8 +471,6 @@
                 How was your experience?
             </p>
 
-
-            <!-- Stars -->
 
             <div class="stars">
 
@@ -575,8 +497,6 @@
             </div>
 
 
-            <!-- Comment -->
-
             <textarea
                 id="ratingComment"
                 class="form-control mt-4"
@@ -584,8 +504,6 @@
                 rows="3"
             ></textarea>
 
-
-            <!-- Submit -->
 
             <button
                 class="btn btn-primary mt-3"
@@ -601,11 +519,8 @@
 </section>
 
 
-<!-- =====================================================
-     JAVASCRIPT
-===================================================== -->
-
 <script src="script.js"></script>
 
 </body>
+
 </html>
